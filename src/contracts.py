@@ -14,6 +14,7 @@ class RunTelemetry(BaseModel):
     llm_calls: int | None = None
     tool_calls: int | None = None
     tool_names: list[str] = Field(default_factory=list)
+    agent_names: list[str] = Field(default_factory=list)
 
 
 class ProcurementDecision(BaseModel):

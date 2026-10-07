@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from src.contracts import EvidenceItem, ProcurementDecision, RunTelemetry
 
@@ -64,12 +65,13 @@ def validate_and_assemble_response(
     # Defend against LLM hallucinating approval authority
     forbidden_tokens = ["auto-approved", "purchase approved", "automatically approved", "override policy"]
     for token in forbidden_tokens:
-        if token in raw_summary.lower():
+        pattern = re.compile(re.escape(token), re.IGNORECASE)
+        if pattern.search(raw_summary):
             logger.warning("Sanitizing unauthorized approval claim in LLM summary.")
-            raw_summary = raw_summary.replace(token, "[unauthorized claim removed]")
-        if token in raw_reasoning.lower():
+            raw_summary = pattern.sub("[unauthorized claim removed]", raw_summary)
+        if pattern.search(raw_reasoning):
             logger.warning("Sanitizing unauthorized approval claim in LLM reasoning.")
-            raw_reasoning = raw_reasoning.replace(token, "[unauthorized claim removed]")
+            raw_reasoning = pattern.sub("[unauthorized claim removed]", raw_reasoning)
 
     # Provide high-quality defaults if LLM generated empty strings
     if not raw_summary:
@@ -117,4 +119,137 @@ def validate_and_assemble_response(
         reasoning=raw_reasoning,
         catalog_fit_analysis=raw_catalog_fit,
         clarification_questions=questions,
+    )
+
+
+# =====================================================================
+# ARCHITECTURE B: STAGED TWO-AGENT CONTRACTS
+# =====================================================================
+
+
+class IntakeOverlapDossier(BaseModel):
+    """Structured analyst dossier produced by Agent 1 (Intake & Overlap Specialist).
+
+    Represents the typed handoff to Agent 2.
+    """
+    request_id: str
+    business_need: str = Field(description="Core business objective identified from request")
+    intended_workflow: str = Field(description="Operational workflow where tool will be applied")
+    user_persona: str = Field(description="Target user profile and department context")
+    requested_capabilities: list[str] = Field(default_factory=list, description="Key functional capabilities requested")
+    relevant_catalog_matches: list[str] = Field(default_factory=list, description="Existing software catalog tools in same category/vendor")
+    existing_tool_overlap: bool = Field(default=False, description="Whether software overlap was detected")
+    functional_fit_analysis: str = Field(description="Analysis of whether catalog alternatives meet the need")
+    functional_gaps: list[str] = Field(default_factory=list, description="Capabilities not satisfied by existing tools")
+    unresolved_questions: list[str] = Field(default_factory=list, description="Intake questions regarding business requirements")
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0, description="Confidence score in available evidence")
+
+
+class GovernanceTriageDossier(BaseModel):
+    """Structured governance dossier produced by Agent 2 (Governance & Triage Specialist)."""
+    request_id: str
+    executive_summary: str = Field(description="Concise triage overview for procurement leadership")
+    governance_summary: str = Field(description="Summary of all required governance reviews")
+    financial_summary: str = Field(description="Budget, spend threshold, and finance governance notes")
+    security_summary: str = Field(description="InfoSec review status, data access, and vendor posture")
+    privacy_summary: str = Field(description="Data privacy, PII, and regulatory assessment")
+    legal_summary: str = Field(description="Contractual terms and new-vendor legal assessment")
+    risk_explanation: str = Field(description="Detailed explanation of risk flags for human reviewers")
+    recommended_human_actions: list[str] = Field(default_factory=list, description="Specific actions required by human reviewers")
+    clarification_questions: list[str] = Field(default_factory=list, description="Commercial/policy clarification questions")
+
+
+class StagedAgentResponse(ProcurementDecision):
+    """Structured final response for Architecture B (Staged Two-Agent Architecture).
+
+    Inherits all fields from ProcurementDecision to maintain 100% backward compatibility
+    with the evaluation harness, while embedding both Agent 1 and Agent 2 structured dossiers.
+    """
+    summary: str = Field(default="", description="Executive triage summary")
+    reasoning: str = Field(default="", description="Synthesized qualitative reasoning")
+    catalog_fit_analysis: str = Field(default="", description="Functional fit and overlap analysis from Agent 1")
+    clarification_questions: list[str] = Field(default_factory=list, description="Consolidated follow-up questions")
+    intake_dossier: IntakeOverlapDossier | None = Field(default=None, description="Structured handoff from Agent 1")
+    governance_dossier: GovernanceTriageDossier | None = Field(default=None, description="Governance dossier from Agent 2")
+
+
+def validate_and_assemble_staged_response(
+    intake_dossier: IntakeOverlapDossier,
+    gov_dossier: GovernanceTriageDossier,
+    decision: ProcurementDecision,
+    telemetry: RunTelemetry,
+) -> StagedAgentResponse:
+    """Validate dossiers against authoritative deterministic decision and assemble final StagedAgentResponse.
+
+    STRICT SAFETY INVARIANTS ENFORCED:
+    1. final.recommendation == decision.recommendation (Agents cannot alter recommendation)
+    2. final.required_approvals == decision.required_approvals (Agents cannot alter approval roster)
+    3. final.missing_information == decision.missing_information (Agents cannot fabricate missing data)
+    4. final.risk_flags == decision.risk_flags (Agents cannot clear risk flags)
+    5. final.human_review_required == True (Agents cannot bypass human review)
+    6. final.evidence == decision.evidence (Evidence grounding preserved)
+    7. final.next_step == decision.next_step (Authoritative routing instruction preserved)
+    """
+    # Sanitize executive summary and governance narrative against unauthorized approval tokens
+    forbidden_tokens = ["auto-approved", "purchase approved", "automatically approved", "override policy"]
+    raw_summary = gov_dossier.executive_summary.strip()
+    raw_reasoning = f"{gov_dossier.governance_summary.strip()} {gov_dossier.risk_explanation.strip()}".strip()
+
+    for token in forbidden_tokens:
+        pattern = re.compile(re.escape(token), re.IGNORECASE)
+        if pattern.search(raw_summary):
+            logger.warning("Sanitizing unauthorized approval claim in Agent 2 summary.")
+            raw_summary = pattern.sub("[unauthorized claim removed]", raw_summary)
+        if pattern.search(raw_reasoning):
+            logger.warning("Sanitizing unauthorized approval claim in Agent 2 reasoning.")
+            raw_reasoning = pattern.sub("[unauthorized claim removed]", raw_reasoning)
+
+    # Fallback strings if empty
+    if not raw_summary:
+        raw_summary = (
+            f"Staged procurement assessment for request {decision.request_id} ({decision.recommendation}): "
+            f"Routing to {', '.join(decision.required_approvals) if decision.required_approvals else 'Procurement'}."
+        )
+
+    if not raw_reasoning:
+        risk_str = ", ".join(decision.risk_flags) if decision.risk_flags else "none"
+        raw_reasoning = (
+            f"Evaluated under corporate procurement policy. "
+            f"Identified governance risks: {risk_str}. "
+            f"Decision precedence mandates state {decision.recommendation}."
+        )
+
+    # Merge clarification questions from Agent 1 and Agent 2
+    seen_q: set[str] = set()
+    merged_questions: list[str] = []
+    for q in intake_dossier.unresolved_questions + gov_dossier.clarification_questions:
+        q_clean = q.strip()
+        if q_clean and q_clean.lower() not in seen_q:
+            seen_q.add(q_clean.lower())
+            merged_questions.append(q_clean)
+
+    # Guarantee clarification questions exist if missing_information is flagged
+    if decision.missing_information:
+        for missing_item in decision.missing_information:
+            missing_q = f"Please provide clarification or documentation for: {missing_item}."
+            if missing_q.lower() not in seen_q:
+                seen_q.add(missing_q.lower())
+                merged_questions.append(missing_q)
+
+    return StagedAgentResponse(
+        request_id=decision.request_id,
+        recommendation=decision.recommendation,  # STRICT: Invariant
+        evidence=decision.evidence,              # STRICT: Invariant
+        required_approvals=list(decision.required_approvals),  # STRICT: Invariant
+        missing_information=list(decision.missing_information),# STRICT: Invariant
+        risk_flags=list(decision.risk_flags),    # STRICT: Invariant
+        next_step=decision.next_step,            # STRICT: Invariant
+        human_review_required=True,              # STRICT: Policy Invariant
+        telemetry=telemetry,
+        summary=raw_summary,
+        reasoning=raw_reasoning,
+        catalog_fit_analysis=intake_dossier.functional_fit_analysis,
+        clarification_questions=merged_questions,
+        intake_dossier=intake_dossier,
+        governance_dossier=gov_dossier,
     )

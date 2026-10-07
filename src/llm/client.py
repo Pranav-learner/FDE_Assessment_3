@@ -64,6 +64,7 @@ class MockLLMClient(BaseLLMClient):
         should_raise: Exception | None = None,
         model_name: str = "mock-model",
     ):
+        self.custom_default_response = default_response
         self.default_response = default_response or json.dumps({
             "summary": "Mock summary of procurement request.",
             "reasoning": "Mock business and policy analysis based strictly on available evidence.",
@@ -89,8 +90,39 @@ class MockLLMClient(BaseLLMClient):
 
         if self.responses:
             resp_text = self.responses.pop(0)
+        elif self.custom_default_response is not None:
+            resp_text = self.custom_default_response
         else:
-            resp_text = self.default_response
+            # Intelligent role-specific mock response
+            system_text = "".join(m.content for m in messages if m.role == "system")
+            user_text = "".join(m.content for m in messages if m.role != "system")
+            if "Intake and Functional Overlap Specialist" in system_text:
+                resp_text = json.dumps({
+                    "business_need": "Mock business need for software tooling.",
+                    "intended_workflow": "Mock operational department workflow.",
+                    "user_persona": "Enterprise department team member.",
+                    "requested_capabilities": ["Mock capability"],
+                    "relevant_catalog_matches": ["Mock catalog match"] if "Overlap Detected by Tool: True" in user_text else [],
+                    "existing_tool_overlap": "Overlap Detected by Tool: True" in user_text,
+                    "functional_fit_analysis": "Mock functional fit analysis against catalog tools.",
+                    "functional_gaps": [],
+                    "unresolved_questions": [],
+                    "confidence": 0.95,
+                })
+            elif "Governance and Triage Specialist" in system_text:
+                resp_text = json.dumps({
+                    "executive_summary": "Mock executive triage summary.",
+                    "governance_summary": "Mock governance summary covering policy requirements.",
+                    "financial_summary": "Mock financial delegation review.",
+                    "security_summary": "Mock security assessment.",
+                    "privacy_summary": "Mock privacy assessment.",
+                    "legal_summary": "Mock legal contract assessment.",
+                    "risk_explanation": "Mock explanation of identified risk flags.",
+                    "recommended_human_actions": ["Route to assigned approvers"],
+                    "clarification_questions": [],
+                })
+            else:
+                resp_text = self.default_response
 
         return LLMResponse(
             text=resp_text,
@@ -236,9 +268,90 @@ class DeterministicLocalClient(BaseLLMClient):
         max_tokens: int = 1500,
         timeout: float = 15.0,
     ) -> LLMResponse:
-        # Extract user message context to inform local deterministic synthesis
-        user_text = "".join(m.content for m in messages if m.role == "user")
+        # Extract system and user message context to inform local deterministic synthesis
+        system_text = "".join(m.content for m in messages if m.role == "system")
+        user_text = "".join(m.content for m in messages if m.role != "system")
 
+        # -------------------------------------------------------------
+        # 1. AGENT 1 (INTAKE & OVERLAP SPECIALIST) SCHEMA
+        # -------------------------------------------------------------
+        if "Intake and Functional Overlap Specialist" in system_text:
+            has_overlap = "Overlap Detected by Tool: True" in user_text
+            missing_info = "MISSING" in user_text
+
+            unresolved_q: list[str] = []
+            if missing_info:
+                unresolved_q = [
+                    "What is the expected annual software cost in USD?",
+                    "How many user seats or licenses are required?",
+                ]
+
+            fit_analysis = "No conflicting software overlap identified in active catalog."
+            if has_overlap:
+                fit_analysis = "Catalog search identified active alternative tools in the same category. Review of functional necessity required."
+
+            agent1_payload = {
+                "business_need": "Operational team software capability enhancement.",
+                "intended_workflow": "Business workflow execution within requesting department.",
+                "user_persona": "Enterprise department team members.",
+                "requested_capabilities": ["Target software functionality"],
+                "relevant_catalog_matches": ["Catalog software matches" if has_overlap else "None"],
+                "existing_tool_overlap": has_overlap,
+                "functional_fit_analysis": fit_analysis,
+                "functional_gaps": ["Specialized workflow requirements"] if has_overlap else [],
+                "unresolved_questions": unresolved_q,
+                "confidence": 0.95,
+            }
+            return LLMResponse(
+                text=json.dumps(agent1_payload),
+                model_name=self.model_name,
+                raw_response={"offline": True, "agent": "intake_overlap"},
+                prompt_tokens=60,
+                completion_tokens=45,
+            )
+
+        # -------------------------------------------------------------
+        # 2. AGENT 2 (GOVERNANCE & TRIAGE SPECIALIST) SCHEMA
+        # -------------------------------------------------------------
+        if "Governance and Triage Specialist" in system_text:
+            summary = "Procurement request evaluated under corporate policy guidelines."
+            governance = "All evidence evaluated deterministically against policy thresholds and catalog constraints."
+            clarification_questions = []
+
+            if "missing_information" in user_text or "MISSING" in user_text:
+                summary = "Request intake is incomplete. Mandatory commercial or operational fields are missing."
+                governance = "Per Procurement Policy Section 1, missing material information prevents safe routing."
+                clarification_questions = [
+                    "Please provide the annual cost in USD.",
+                    "Please specify the expected user seat count.",
+                    "Please declare the intended data access level.",
+                ]
+            elif "vendor_risk_unavailable" in user_text:
+                summary = "External vendor risk status could not be verified due to service outage."
+                governance = "Per Procurement Policy Section 10, unverified vendor security posture requires manual risk review."
+
+            agent2_payload = {
+                "executive_summary": summary,
+                "governance_summary": governance,
+                "financial_summary": "Financial spend delegation evaluated against departmental budget.",
+                "security_summary": "Security review status evaluated per data access and vendor risk.",
+                "privacy_summary": "Privacy review status evaluated per regional data transfer and PII rules.",
+                "legal_summary": "Legal review evaluated per contract terms and vendor maturity.",
+                "risk_explanation": "Governance risk flags determined strictly from corporate policy checks.",
+                "recommended_human_actions": ["Route for required stakeholder sign-offs"],
+                "clarification_questions": clarification_questions,
+            }
+            return LLMResponse(
+                text=json.dumps(agent2_payload),
+                model_name=self.model_name,
+                raw_response={"offline": True, "agent": "governance_triage"},
+                prompt_tokens=80,
+                completion_tokens=60,
+            )
+
+        # -------------------------------------------------------------
+        # 3. ARCHITECTURE A (SINGLE AGENT) SCHEMA
+        # -------------------------------------------------------------
         summary = "Procurement request evaluated under corporate policy guidelines."
         reasoning = "All evidence evaluated deterministically against policy thresholds and catalog constraints."
         clarification_questions = []
@@ -269,7 +382,7 @@ class DeterministicLocalClient(BaseLLMClient):
         return LLMResponse(
             text=json.dumps(result_payload),
             model_name=self.model_name,
-            raw_response={"offline": True},
+            raw_response={"offline": True, "agent": "single"},
             prompt_tokens=50,
             completion_tokens=40,
         )

@@ -9,6 +9,7 @@ class RunTelemetryCounter:
     llm_calls: int = 0
     tool_calls: int = 0
     tool_names: list[str] = field(default_factory=list)
+    agent_names: list[str] = field(default_factory=list)
 
     def record_llm_call(self) -> None:
         self.llm_calls += 1
@@ -16,3 +17,6 @@ class RunTelemetryCounter:
     def record_tool_call(self, name: str) -> None:
         self.tool_calls += 1
         self.tool_names.append(name)
+
+    def record_agent(self, name: str) -> None:
+        self.agent_names.append(name)

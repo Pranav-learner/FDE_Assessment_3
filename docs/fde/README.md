@@ -37,6 +37,10 @@ This directory contains the canonical engineering and business specifications go
 * [20_single_agent_contract.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/20_single_agent_contract.md) — SingleAgentResponse output schema, field authority matrix, and deterministic validator.
 * [21_single_agent_prompt.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/21_single_agent_prompt.md) — System prompt architecture, untrusted data boundaries, and prompt injection defenses.
 * [22_phase4_test_plan.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/22_phase4_test_plan.md) — Phase 4 test execution report, 20-test matrix, and public evaluation benchmark (99 passing tests).
+* [23_architecture_b.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/23_architecture_b.md) — Architecture B staged two-agent architecture specification, responsibilities, lifecycle, and fallback.
+* [24_staged_agent_contracts.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/24_staged_agent_contracts.md) — IntakeOverlapDossier, GovernanceTriageDossier, and StagedAgentResponse contracts.
+* [25_agent_handoff.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/25_agent_handoff.md) — Structured inter-agent handoff protocol, typed data flow, and injection isolation.
+* [26_phase5_test_plan.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/26_phase5_test_plan.md) — Phase 5 test plan, 26-test matrix, cross-architecture parity verification, and public evaluation (125 passing tests).
 
 ---
 
