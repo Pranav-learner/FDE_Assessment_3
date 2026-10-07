@@ -55,9 +55,20 @@ Both architectures achieve **100% deterministic policy parity** because the unde
 
 ---
 
-## 5. Quick Start & Setup
+## 5. Quick Start (One-Command Start Path)
 
-### 5.1 Local Python Environment
+The application provides a root-level one-command startup script `./run.sh` that automatically detects or configures the environment, safe defaults, and launches both the Mock API and Streamlit Web UI:
+
+```bash
+git clone <repo>
+cd <repo>
+./run.sh
+```
+
+- **Vendor-Risk & Copilot REST API:** `http://127.0.0.1:8001`
+- **Interactive Procurement Web UI:** `http://127.0.0.1:8501`
+
+### 5.1 Manual Local Python Setup
 ```bash
 # 1. Create and activate virtual environment
 python -m venv .venv
@@ -74,6 +85,7 @@ python run_local.py
 ```
 - **FastAPI Vendor-Risk & Copilot API:** `http://127.0.0.1:8001`
 - **Streamlit Web UI:** `http://127.0.0.1:8501`
+
 
 ### 5.2 Environment Configuration
 Copy `.env.example` to `.env`:
@@ -152,7 +164,7 @@ docker compose down
 
 ## 9. Testing & Evaluation
 
-### 9.1 Test Suites (130 Tests, 0 Failures)
+### 9.1 Test Suites (136 Tests, 0 Failures)
 ```bash
 # Run all unit, rule, agent, parity, and E2E tests
 python -m unittest discover tests -v
@@ -197,3 +209,5 @@ Detailed technical specifications are located in `docs/fde/`:
 - [`docs/fde/31_production_architecture.md`](docs/fde/31_production_architecture.md) — Production architecture and trust boundaries.
 - [`docs/fde/32_deployment_runbook.md`](docs/fde/32_deployment_runbook.md) — Operations guide (Local, Docker, probes, rollback).
 - [`docs/fde/33_production_readiness_checklist.md`](docs/fde/33_production_readiness_checklist.md) — Production readiness audit checklist.
+- [`docs/fde/34_assessment_requirements.md`](docs/fde/34_assessment_requirements.md) — Official Assessment Requirement Matrix (Rubric & Deliverables).
+

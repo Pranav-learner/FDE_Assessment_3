@@ -48,8 +48,10 @@ This directory contains the canonical engineering and business specifications go
 * [31_production_architecture.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/31_production_architecture.md) — Production architecture blueprint, trust boundaries, failure isolation, and telemetry specification.
 * [32_deployment_runbook.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/32_deployment_runbook.md) — Production operations guide covering Local Python, Docker containerization, health probes, and rollback procedures.
 * [33_production_readiness_checklist.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/33_production_readiness_checklist.md) — Comprehensive FDE audit checklist across security, reliability, testing, and operations (VERDICT: PRODUCTION READY).
+* [34_assessment_requirements.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/34_assessment_requirements.md) — Official Assessment Requirement Matrix mapping rubrics (Product, E2E, Agents, Reliability, Evals, Engineering) and explicit deliverables to verified implementations.
 
 ---
+
 
 ## 2. Executive Problem & Objective Summary
 
