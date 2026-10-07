@@ -24,7 +24,14 @@ This directory contains the canonical engineering and business specifications go
 * [07_success_metrics.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/07_success_metrics.md) — Measurable engineering and business KPIs classified into Leading and Lagging indicators with formulas and targets.
 * [08_architecture_principles.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/08_architecture_principles.md) — The ten core architecture principles and the tripartite boundary (AI vs. Code vs. Human).
 * [09_evaluation_case_analysis.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/09_evaluation_case_analysis.md) — Detailed analysis of public evaluation cases (PUB-01 to PUB-06) and generalization guarantees.
-* [10_edge_case_matrix.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/10_edge_case_matrix.md) — Exhaustive operational matrix mapping 16 edge cases from trigger to expected recommendation.
+* [10_data_model.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/10_data_model.md) — Entity relationships, data schemas, systems of record, and evidence model.
+* [11_tool_contracts.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/11_tool_contracts.md) — Tool input/output schemas, failure behaviors, and universal ToolResult envelope.
+* [12_deterministic_rules.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/12_deterministic_rules.md) — Specification of the 12 deterministic rule evaluation modules and threshold gates.
+* [13_phase2_test_plan.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/13_phase2_test_plan.md) — Phase 2 test execution report and coverage breakdown.
+* [14_decision_engine.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/14_decision_engine.md) — Deterministic decision engine architecture, lifecycle, and rule vs decision distinction.
+* [15_decision_contract.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/15_decision_contract.md) — Decision output schema, controlled recommendation vocabulary, and trace model.
+* [16_decision_precedence.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/16_decision_precedence.md) — Decision precedence hierarchy (Priority 1 through 4) and conflict resolution.
+* [17_phase3_test_plan.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/17_phase3_test_plan.md) — Phase 3 test matrix and regression report (77 passing tests).
 
 ---
 
