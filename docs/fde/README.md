@@ -41,6 +41,9 @@ This directory contains the canonical engineering and business specifications go
 * [24_staged_agent_contracts.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/24_staged_agent_contracts.md) — IntakeOverlapDossier, GovernanceTriageDossier, and StagedAgentResponse contracts.
 * [25_agent_handoff.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/25_agent_handoff.md) — Structured inter-agent handoff protocol, typed data flow, and injection isolation.
 * [26_phase5_test_plan.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/26_phase5_test_plan.md) — Phase 5 test plan, 26-test matrix, cross-architecture parity verification, and public evaluation (125 passing tests).
+* [27_comparative_evaluation.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/27_comparative_evaluation.md) — Comparative evaluation methodology, 15 qualitative cases, scoring rubrics, benchmark results, and failure analysis.
+* [28_architecture_decision.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/28_architecture_decision.md) — Comprehensive FDE architecture decision memo: trade-offs, scorecard, production MVP recommendation, and conditional escalation.
+* [29_phase6_test_plan.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/29_phase6_test_plan.md) — Phase 6 test plan, regression verification, benchmark repetitions, and acceptance criteria (130 passing tests).
 
 ---
 

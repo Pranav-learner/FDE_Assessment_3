@@ -142,5 +142,79 @@
     "data_access_level": "none",
     "requested_integrations": [],
     "urgency": "normal"
+  },
+  {
+    "request_id": "REQ-1011",
+    "requester_id": "E001",
+    "product_name": "DocSpace LiveChat Module",
+    "vendor_name": "DocSpace",
+    "category": "Customer Support",
+    "annual_cost_usd": 4500,
+    "user_count": 5,
+    "business_justification": "Marketing needs an omnichannel real-time customer chat solution; evaluating knowledge base tool DocSpace.",
+    "data_access_level": "customer_pii",
+    "requested_integrations": [
+      "Website chat widget"
+    ],
+    "urgency": "normal"
+  },
+  {
+    "request_id": "REQ-1012",
+    "requester_id": "E002",
+    "product_name": "General Productivity Boost",
+    "vendor_name": "CodeMate",
+    "category": "Developer AI",
+    "annual_cost_usd": 5000,
+    "user_count": 10,
+    "business_justification": "Need general productivity enhancements for our daily team workflow.",
+    "data_access_level": "internal_documents",
+    "requested_integrations": [],
+    "urgency": "normal"
+  },
+  {
+    "request_id": "REQ-1013",
+    "requester_id": "E005",
+    "product_name": "HelpDeskly Queue Optimizer",
+    "vendor_name": "HelpDeskly",
+    "category": "Customer Support",
+    "annual_cost_usd": null,
+    "user_count": null,
+    "business_justification": "Automate queue sorting and SLA prioritization for incoming support tickets.",
+    "data_access_level": "customer_pii",
+    "requested_integrations": [
+      "HelpDeskly"
+    ],
+    "urgency": "normal"
+  },
+  {
+    "request_id": "REQ-1014",
+    "requester_id": "E001",
+    "product_name": "BrandBoard Template Pro",
+    "vendor_name": "BrandBoard",
+    "category": "Design & Creative",
+    "annual_cost_usd": 14000,
+    "user_count": 20,
+    "business_justification": "Need team asset creator. BrandBoard vendor agreement terms are still in draft status.",
+    "data_access_level": "internal_marketing",
+    "requested_integrations": [
+      "SSO"
+    ],
+    "urgency": "normal"
+  },
+  {
+    "request_id": "REQ-1015",
+    "requester_id": "E002",
+    "product_name": "SignalWatch Enterprise Telemetry",
+    "vendor_name": "SignalWatch",
+    "category": "Observability",
+    "annual_cost_usd": 35000,
+    "user_count": 50,
+    "business_justification": "Enterprise-wide observability across multi-region production cloud accounts and Kubernetes clusters.",
+    "data_access_level": "production_telemetry",
+    "requested_integrations": [
+      "Production cloud account",
+      "Kubernetes cluster"
+    ],
+    "urgency": "high"
   }
 ]
