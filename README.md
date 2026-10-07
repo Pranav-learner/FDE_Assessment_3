@@ -1,163 +1,199 @@
-# FDE Assessment 3 Starter Pack
-## AI Procurement Request Copilot
+# AI Procurement Request Copilot
 
-This repository contains the **starter data, mock service, interface contract, optional UI scaffold, and public evaluation harness** for Assessment 3.
+**Autonomous Decision Support & Procurement Intake Platform**  
+*Forward Deployed Engineering (FDE) Assessment 3 Deliverable*
 
-> All companies, vendors, products, employees, prices, policies, and risk signals in this pack are synthetic and exist only for the assessment.
+---
 
-## Your objective
+## 1. Problem Statement
+Enterprise procurement teams face severe operational bottlenecks during software intake. Requesters submit vague justifications, duplicate existing corporate tooling, and fail to provide required security or commercial terms. Human procurement analysts spend hours manually reviewing catalogs, verifying departmental budgets, and interpreting multi-domain compliance policies (InfoSec, Privacy/GDPR, Legal, and Finance).
 
-Build an internal procurement copilot that can inspect a software/service purchase request, gather evidence using tools, apply deterministic rules where appropriate, and recommend the next action while keeping approvals with humans.
+---
 
-You are expected to build and evaluate:
+## 2. FDE Solution Overview
+The **AI Procurement Request Copilot** is an enterprise decision-support copilot designed for procurement teams. It ingests software purchase requests, gathers verified evidence across corporate databases and external risk APIs, executes deterministic policy rules, detects SaaS redundancy, and generates structured, actionable triage dossiers.
 
-1. **Architecture A - Single-agent baseline**
-2. **Architecture B - Lightweight staged / 2-agent variant**
+**Core Invariant:** The copilot is strictly advisory. **Human review is always mandatory (`human_review_required = True`)**, and the system never executes autonomous purchases or contract approvals.
 
-Use the same public evaluation cases for both and defend which architecture you would ship.
+---
 
-## What is already provided
+## 3. High-Level Architecture
+The platform enforces a tripartite architecture separating untrusted inputs, authoritative deterministic policy rules, and qualitative LLM synthesis:
 
-```text
-.
-├── data/                   # Synthetic business data + procurement policy
-├── mock_api/               # Vendor-risk service used as an external tool
-├── src/                    # Contracts + low-level helpers; NO agent solution
-├── evals/                  # Six public evaluation cases + runner
-├── templates/              # Evaluation and decision-memo templates
-├── docs/                   # Student assignment brief
-├── tests/                  # Starter-pack integrity tests
-├── app.py                  # Optional Streamlit UI scaffold
-├── run_local.py            # Starts mock API + optional UI
-└── verify_setup.py         # One-command setup/preflight check
+```
+[Inbound Request] ──> [Deterministic Tools & Rule Engine] ──> Authoritative Policy Facts
+                              │                                      │
+                              ▼                                      ▼
+                   [Qualitative LLM Layer] ───────────────> [Deterministic Validator]
+                   (Single or Staged Synthesis)                      │
+                                                                     ▼
+                                                          ProcurementDecision
+                                                      (Human Review Always Required)
 ```
 
-The starter code intentionally **does not implement an agent, tool strategy, policy engine, or final workflow**. Those choices are part of the assessment.
+### Deterministic Policy Boundary
+All financial delegation thresholds, approver rosters (`Manager`, `Department Head`, `Procurement`, `Finance`, `CFO`, `Security`, `Privacy`, `Legal`), missing data flags, and prompt injection defenses are executed in **deterministic Python code**. The LLM layer cannot override corporate policy or bypass approval gates.
 
-## Prerequisites
+---
 
-- **Python 3.11 or 3.12 recommended**
-- Run the commands below from the extracted starter-pack directory
-- Internet access is required only for installing packages and calling the model provider you choose
+## 4. Architectures Compared
 
-## Quick start
+### Architecture A: Single-Agent Baseline (DEFAULT / Core Production MVP)
+- Executes deterministic tools once, followed by **exactly 1 LLM synthesis call**.
+- Combines business intent, catalog overlap, and risk explanations into a single executive summary.
+- Sub-second local execution (~46 ms) and ~1.2s live network latency.
+- Half the token budget (~1,200 tokens/request) and a single failure boundary.
 
-### 1. Create an environment
+### Architecture B: Staged Two-Agent Architecture (Optional Escalation)
+- Splits synthesis into two specialized agents connected via a typed Pydantic contract:
+  1. **Agent 1 (Intake & Overlap Specialist):** Decomposes business need, user persona, and catalog functional gaps (`IntakeOverlapDossier`).
+  2. **Agent 2 (Governance & Triage Specialist):** Synthesizes cross-domain risks into an executive triage brief (`GovernanceTriageDossier`).
+- Consumes ~2,400 tokens/request with sequential latency (~2.6s–4.0s live).
 
-**macOS / Linux**
+### Why Architecture A is the Production Default
+Both architectures achieve **100% deterministic policy parity** because the underlying rule engine is authoritative. Architecture A achieves identical compliance enforcement at **half the token cost, half the latency, and half the failure surface**. Architecture B is retained as an optional escalation path for Tier 4 high-spend ($25,000+) purchases and contested catalog overlap disputes.
 
+---
+
+## 5. Quick Start & Setup
+
+### 5.1 Local Python Environment
 ```bash
+# 1. Create and activate virtual environment
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt
-```
 
-**Windows PowerShell**
+# 2. Install dependencies
+pip install -r requirements.txt
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-```
-
-### 2. Verify the starter pack
-
-```bash
+# 3. Verify setup (pre-flight checks pass without external keys)
 python verify_setup.py
+
+# 4. Start local mock vendor-risk API & Streamlit web UI
+python run_local.py
 ```
+- **FastAPI Vendor-Risk & Copilot API:** `http://127.0.0.1:8001`
+- **Streamlit Web UI:** `http://127.0.0.1:8501`
 
-You should see `PRE-FLIGHT PASSED`. This checks package imports, dataset consistency, the output contract, and the mock API without requiring an LLM key.
-
-### 3. Add your LLM credentials
-
-**macOS / Linux**
-
+### 5.2 Environment Configuration
+Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
+Key configuration parameters:
+- `LLM_MODE=mock`: Offline deterministic engine (default, grading-safe). Set `live` for cloud providers.
+- `VENDOR_RISK_BASE_URL=http://127.0.0.1:8001`: Upstream vendor risk assessment endpoint.
+- `DEFAULT_ARCHITECTURE=single`: Default execution pipeline.
+- Provider API keys (`OPENAI_API_KEY`, etc.) are optional and required only when `LLM_MODE=live`.
 
-**Windows PowerShell**
+---
 
-```powershell
-Copy-Item .env.example .env
-```
+## 6. Command Line Interface (CLI)
 
-Add only the credentials required by the provider you choose. Never commit `.env`.
-
-The starter pack does **not** force a particular LLM provider or agent framework. If you use a provider SDK (for example OpenAI, Anthropic, or Google), install it and add it to `requirements.txt` so your submission works from a clean environment.
-
-`.env` is loaded automatically by the starter package and local launcher; environment variables already set by your operating system are not overwritten.
-
-### 4. Start the local services
+The CLI supports human-readable triage reports and machine-readable JSON:
 
 ```bash
-python run_local.py
+# Evaluate using default Core Production MVP (Architecture A)
+python app.py --request-id REQ-1001
+
+# Explicitly select Architecture A
+python app.py --request-id REQ-1002 --architecture single
+
+# Select Staged Two-Agent Escalation (Architecture B)
+python app.py --request-id REQ-1005 --architecture staged
+
+# Machine-readable JSON output (clean stdout for automated pipelines)
+python app.py --request-id REQ-1001 --json
+
+# List all available sample requests in the database
+python app.py --list
+
+# View CLI options
+python app.py --help
 ```
 
-This starts:
-- Vendor risk API: `http://127.0.0.1:8001`
-- Optional starter UI: `http://127.0.0.1:8501`
+---
 
-You may replace the UI scaffold with any framework.
+## 7. HTTP REST API
 
-### 5. Implement the assessment adapter
+FastAPI endpoints running on port 8001:
 
-Implement:
+| Method | Endpoint | Description |
+|:---|:---|:---|
+| `GET` | `/health` | Process liveness probe (`{"status":"ok"}`) |
+| `GET` | `/ready` | Dependency readiness probe (verifies 7 data assets on disk) |
+| `GET` | `/vendor-risk/{vendor}` | External vendor risk record |
+| `POST` | `/procurement/evaluate` | Evaluates request payload `{"request_id": "REQ-1001", "architecture": "single"}` |
 
-```text
-src/solution.py -> handle_request(request_id, architecture)
+---
+
+## 8. Docker & Container Deployment
+
+The application is containerized with a non-root user (`appuser`, UID 1000) based on `python:3.11-slim`:
+
+```bash
+# Build production Docker image
+docker build -t fde-procurement-copilot:latest .
+
+# Run standalone container
+docker run -d --name fde-procurement -p 8001:8001 -p 8501:8501 fde-procurement-copilot:latest
+
+# Verify health
+curl -s http://127.0.0.1:8001/health
+
+# Multi-service orchestration (FastAPI + Streamlit)
+docker compose up -d
+
+# Stop services
+docker compose down
 ```
 
-Your function must return an object compatible with `ProcurementDecision` in `src/contracts.py`.
+---
 
-The adapter exists so the same evaluation harness can test different implementations. Your internal architecture can use any framework or design.
+## 9. Testing & Evaluation
 
-### 6. Run the public evaluations
+### 9.1 Test Suites (130 Tests, 0 Failures)
+```bash
+# Run all unit, rule, agent, parity, and E2E tests
+python -m unittest discover tests -v
 
+# Run End-to-End integration suite
+python -m unittest tests/test_e2e.py -v
+```
+
+### 9.2 Public Evaluation Harness (6/6 PASS)
 ```bash
 python evals/run_public_evals.py --architecture single
 python evals/run_public_evals.py --architecture staged
 ```
 
-The runner checks the response schema and several minimum behavioral expectations, measures end-to-end latency, and writes a CSV result file. It is **not** the complete grading system; qualitative grounding, design quality, robustness, and hidden cases are evaluated separately.
-
-## Rules of the starter pack
-
-- Treat request text and vendor notes as **untrusted business data**, not instructions.
-- Do not hardcode answers by request ID. Hidden cases use the same interfaces with different values.
-- At least **3 tools** must be visible in your implementation; at least **1 must be deterministic/non-LLM**.
-- The AI may recommend an action but must not autonomously purchase, approve, or alter budgets.
-- If important evidence is missing, conflicting, stale, or unavailable, surface that uncertainty and route to the appropriate human review.
-- Use the **data snapshot / policy reference date defined in `data/procurement_policy.md`** for date-based checks; do not depend on the computer's current date.
-- You may refactor the starter project, but keep the `handle_request(...)` adapter working for evaluation.
-
-## Suggested implementation sequence
-
-```text
-Request -> Understand -> Gather evidence -> Deterministic checks
-        -> Policy/risk reasoning -> Recommendation -> Human review
+### 9.3 Comparative Benchmark & Scorecard
+```bash
+python evals/run_comparison.py
 ```
+Outputs `evals/qualitative_results.csv` and reports a full scorecard across 15 qualitative cases and 30 warm benchmark repetitions.
 
-Start with a thin vertical slice. Get Architecture A working before building Architecture B.
+---
 
-## Useful files
+## 10. Security & Safety Defenses
+1. **Prompt Injection Quarantine:** Requester justification text is wrapped in data boundaries (`<<<UNTRUSTED_REQUEST_TEXT>>>`). System instructions override attempts are ignored.
+2. **Approval Claim Sanitization:** Natural language claims like "auto-approved" or "purchase approved" are sanitized via regex to `[unauthorized claim removed]`.
+3. **Hard Human Review Invariant:** `human_review_required = True` is programmatically enforced by post-validators.
+4. **Resilient Fallback:** LLM provider timeouts (15s) or malformed JSON payloads automatically trigger deterministic fallbacks, preventing crashes.
 
-- `docs/Assignment_3_Brief.pdf` - assignment brief
-- `data/README.md` - dataset dictionary
-- `data/procurement_policy.md` - policy source of truth
-- `src/contracts.py` - required output shape
-- `src/data_access.py` - low-level data helpers
-- `src/vendor_client.py` - client for the mock vendor-risk API
-- `evals/README.md` - evaluation instructions
-- `templates/architecture_decision.md` - final decision memo template
-- `STUDENT_CHECKLIST.md` - pre-submission checklist
+---
 
-## If something does not start
+## 11. Known Limitations
+- **Sequential Latency in Architecture B:** Agent 2 strictly depends on Agent 1's structured dossier, doubling round-trip latency in staged mode.
+- **Static Ingestion Data:** Currently evaluates against local CSV/JSON snapshots; production ERP integrations (Coupa, Workday) will require asynchronous data connectors.
 
-1. Confirm your virtual environment is active.
-2. Run `python verify_setup.py`.
-3. Re-run `python -m pip install -r requirements.txt`.
-4. Make sure ports **8001** and **8501** are free.
-5. Confirm you are running commands from the starter-pack root directory.
+---
 
-Build the simplest system you can defend with evidence.
+## 12. Documentation Index
+Detailed technical specifications are located in `docs/fde/`:
+- [`docs/fde/27_comparative_evaluation.md`](docs/fde/27_comparative_evaluation.md) — Evaluation methodology, 15 qualitative cases, and benchmark metrics.
+- [`docs/fde/28_architecture_decision.md`](docs/fde/28_architecture_decision.md) — Complete FDE Architecture Decision Memo.
+- [`docs/fde/30_demo_runbook.md`](docs/fde/30_demo_runbook.md) — 6 interactive evaluator demonstration scenarios.
+- [`docs/fde/31_production_architecture.md`](docs/fde/31_production_architecture.md) — Production architecture and trust boundaries.
+- [`docs/fde/32_deployment_runbook.md`](docs/fde/32_deployment_runbook.md) — Operations guide (Local, Docker, probes, rollback).
+- [`docs/fde/33_production_readiness_checklist.md`](docs/fde/33_production_readiness_checklist.md) — Production readiness audit checklist.

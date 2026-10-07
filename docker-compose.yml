@@ -1,0 +1,39 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fde-procurement-api:latest
+    container_name: fde-procurement-api
+    ports:
+      - "8001:8001"
+    environment:
+      - VENDOR_RISK_BASE_URL=http://localhost:8001
+      - LLM_MODE=mock
+      - PYTHONUNBUFFERED=1
+    command: ["python", "-m", "uvicorn", "mock_api.app:app", "--host", "0.0.0.0", "--port", "8001"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fde-procurement-ui:latest
+    container_name: fde-procurement-ui
+    ports:
+      - "8501:8501"
+    environment:
+      - VENDOR_RISK_BASE_URL=http://api:8001
+      - LLM_MODE=mock
+      - PYTHONUNBUFFERED=1
+    command: ["streamlit", "run", "app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped

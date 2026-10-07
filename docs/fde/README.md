@@ -44,6 +44,10 @@ This directory contains the canonical engineering and business specifications go
 * [27_comparative_evaluation.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/27_comparative_evaluation.md) — Comparative evaluation methodology, 15 qualitative cases, scoring rubrics, benchmark results, and failure analysis.
 * [28_architecture_decision.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/28_architecture_decision.md) — Comprehensive FDE architecture decision memo: trade-offs, scorecard, production MVP recommendation, and conditional escalation.
 * [29_phase6_test_plan.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/29_phase6_test_plan.md) — Phase 6 test plan, regression verification, benchmark repetitions, and acceptance criteria (130 passing tests).
+* [30_demo_runbook.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/30_demo_runbook.md) — Interactive demo runbook featuring 6 real-world scenarios (low-risk, catalog overlap, security, missing data, prompt injection, and high-spend escalation).
+* [31_production_architecture.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/31_production_architecture.md) — Production architecture blueprint, trust boundaries, failure isolation, and telemetry specification.
+* [32_deployment_runbook.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/32_deployment_runbook.md) — Production operations guide covering Local Python, Docker containerization, health probes, and rollback procedures.
+* [33_production_readiness_checklist.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/33_production_readiness_checklist.md) — Comprehensive FDE audit checklist across security, reliability, testing, and operations (VERDICT: PRODUCTION READY).
 
 ---
 
