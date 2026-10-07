@@ -33,6 +33,10 @@ This directory contains the canonical engineering and business specifications go
 * [16_decision_precedence.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/16_decision_precedence.md) — Decision precedence hierarchy (Priority 1 through 4) and conflict resolution.
 * [17_phase3_test_plan.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/17_phase3_test_plan.md) — Phase 3 test matrix and regression report (77 passing tests).
 * [18_phase3_final_audit.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/18_phase3_final_audit.md) — Comprehensive Phase 3 final architecture audit, remediation matrix, and Phase 4 readiness verdict.
+* [19_architecture_a.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/19_architecture_a.md) — Architecture A single-agent baseline specification, responsibilities, lifecycle, and fallback.
+* [20_single_agent_contract.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/20_single_agent_contract.md) — SingleAgentResponse output schema, field authority matrix, and deterministic validator.
+* [21_single_agent_prompt.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/21_single_agent_prompt.md) — System prompt architecture, untrusted data boundaries, and prompt injection defenses.
+* [22_phase4_test_plan.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/22_phase4_test_plan.md) — Phase 4 test execution report, 20-test matrix, and public evaluation benchmark (99 passing tests).
 
 ---
 
