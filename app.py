@@ -456,13 +456,14 @@ def render_streamlit_ui() -> None:
             tel = result.telemetry
             t_col1, t_col2, t_col3, t_col4 = st.columns(4)
             with t_col1:
-                st.metric("LLM Calls", tel.llm_calls if tel else 1)
+                st.metric("LLM Calls", tel.llm_calls if (tel and tel.llm_calls is not None) else (1 if architecture == "single" else 2))
             with t_col2:
-                st.metric("Tool Calls", tel.tool_calls if tel else 5)
+                st.metric("Tool Calls", tel.tool_calls if (tel and tel.tool_calls is not None) else (len(tel.tool_names) if (tel and tel.tool_names) else 5))
             with t_col3:
-                st.metric("Duration", f"{tel.duration_ms:.1f} ms" if tel else "N/A")
+                agents_count = len(tel.agent_names) if (tel and tel.agent_names) else (1 if architecture == "single" else 2)
+                st.metric("Active Agents", agents_count)
             with t_col4:
-                st.metric("Architecture", architecture)
+                st.metric("Architecture", "Single-Agent" if architecture == "single" else "Staged (2-Agent)")
 
         # MAIN COL 2: EVIDENCE PANEL
         with main_col2:
@@ -564,8 +565,19 @@ def render_streamlit_ui() -> None:
 
 # Determine runtime entry point
 def _is_running_in_streamlit() -> bool:
-    if any(s in sys.argv[0] for s in ("streamlit", "streamlit.exe")):
+    # 1. Check if Streamlit runtime is loaded into sys.modules
+    if "streamlit" in sys.modules:
         return True
+    # 2. Check if streamlit is in execution command or arguments
+    if any("streamlit" in str(arg).lower() for arg in sys.argv):
+        return True
+    # 3. Check for active Streamlit ScriptRunContext
+    try:
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+        if get_script_run_ctx() is not None:
+            return True
+    except Exception:
+        pass
     return False
 
 
@@ -578,3 +590,4 @@ else:
     # When Streamlit executes the file via exec / run, it may not be __main__ or may be imported
     if _is_running_in_streamlit():
         render_streamlit_ui()
+
