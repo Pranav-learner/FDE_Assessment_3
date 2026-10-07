@@ -32,6 +32,7 @@ This directory contains the canonical engineering and business specifications go
 * [15_decision_contract.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/15_decision_contract.md) — Decision output schema, controlled recommendation vocabulary, and trace model.
 * [16_decision_precedence.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/16_decision_precedence.md) — Decision precedence hierarchy (Priority 1 through 4) and conflict resolution.
 * [17_phase3_test_plan.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/17_phase3_test_plan.md) — Phase 3 test matrix and regression report (77 passing tests).
+* [18_phase3_final_audit.md](file:///home/pranav/Documents/FDE_Assessment_3_Starter_Pack/docs/fde/18_phase3_final_audit.md) — Comprehensive Phase 3 final architecture audit, remediation matrix, and Phase 4 readiness verdict.
 
 ---
 
